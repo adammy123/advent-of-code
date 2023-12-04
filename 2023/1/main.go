@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	data, err := os.ReadFile("./1.txt")
+	data, err := os.ReadFile("./input.txt")
 	if err != nil {
 		log.Fatalln("error reading file: ", err)
 	}
@@ -68,7 +68,6 @@ func part2(input string) int {
 		stringToReplaceTo := strconv.Itoa(numToReplaceTo)
 		row = strings.Replace(row, stringToReplace, stringToReplaceTo, 1)
 
-
 		maxIndex := math.MinInt
 		stringToReplace = ""
 		numToReplaceTo = 0
@@ -87,7 +86,6 @@ func part2(input string) int {
 		}
 		stringToReplaceTo = strconv.Itoa(numToReplaceTo)
 		row = strings.Replace(row, stringToReplace, stringToReplaceTo, 1)
-		
 
 		newInput = append(newInput, row)
 		// fmt.Println("new row", row)
