@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"strconv"
@@ -27,13 +26,13 @@ type newSeed struct {
 }
 
 func main() {
-	data, err := os.ReadFile("./input.txt")
-	if err != nil {
-		log.Fatalln("error reading file: ", err)
-	}
-	inputRaw := string(data)
+	// data, err := os.ReadFile("./input.txt")
+	// if err != nil {
+	// log.Fatalln("error reading file: ", err)
+	// }
+	// inputRaw := string(data)
 	// fmt.Println("part1 ans: ", part1(inputRaw))
-	fmt.Println("part2 ans: ", part2(inputRaw))
+	fmt.Println("part2 ans: ", part2())
 }
 
 func part1(input string) int {
@@ -99,7 +98,7 @@ func getSeedMapList(fileName string) []seedMap {
 	return result
 }
 
-func part2(input string) int {
+func part2() int {
 	seeds := []newSeed{}
 
 	seedsData, _ := os.ReadFile("./seeds.txt")
@@ -117,8 +116,7 @@ func part2(input string) int {
 
 	smallestLocation := math.MaxInt
 	ch := make(chan int)
-	for i, newSeed := range seeds {
-		fmt.Println("newSeed numer: ", i)
+	for _, newSeed := range seeds {
 		go getSmallestLocationPerNewSeed(newSeed, maps, ch)
 	}
 
