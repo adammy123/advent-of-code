@@ -15,7 +15,7 @@ func main() {
 	// fmt.Println("part2 ans: ", part2(inputRaw))
 	// fmt.Println("part2 ans: ", part3(inputRaw))
 	fmt.Println("part2 ans: ", part4(inputRaw))
-
+ 
 }
 
 func part1(input string) int {
@@ -114,22 +114,47 @@ func part4(input string) int {
 		patternString := fields[0]
 		toMatch := convertStringToIntSlice(fields[1])
 		
-		
+		result += getNumPossibilities(patternString, toMatch, 0)
 	}
 
 	return result
 }
 
-func getNumPossibilities(pattern string, remainingCombis []int, currCounter, totalPossibilities int) int {
+func getNumPossibilities(pattern string, remainingCombis []int, currCounter int) int {
+
+	currChar := pattern[0:1]
 
 	// last char in pattern, remainingCombis not empty
 	if len(pattern) == 1 {
-		if pattern[0:1] != "." {
-			if cc
+		switch currChar {
+		case "#":
+			currCounter += 1
+			if len(remainingCombis) == 1 && remainingCombis[0] == currCounter {
+				return 1
+			}
+		case ".":
+			if len(remainingCombis) == 1 && remainingCombis[0] == currCounter {
+				return 1
+			}
+		case "?":
+			if len(remainingCombis) == 0 {
+				return 1
+			}
+			if len(remainingCombis) == 1 {
+				tomatch := remainingCombis[0]
+				if abs(tomatch-currCounter) <= 1 {
+					return 1
+				}
+			}
+			return 1
+			// return getNumPossibilities("#", remainingCombis, currCounter, totalPossibilities) + getNumPossibilities(".", remainingCombis, currCounter, totalPossibilities)
 		}
 	}
 
-	currChar := pattern[0:1]
+	switch currChar {
+	case "#":
+		
+	}
 	if currChar == "#" || currChar == "?" {
 		currCounter += 1
 		if len(remainingCombis) > 0 && currCounter <= remainingCombis[0] {
@@ -248,4 +273,11 @@ func isPatternMatched(pattern[]string, toMatch[]int) bool {
 	}
 
 	return totalDamagedSets == len(toMatch)
+}
+
+func abs(x int) int {
+	if x > 0 {
+		return x
+	}
+	return x*-1
 }
