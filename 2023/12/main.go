@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const multiplier = 5
+
 func main() {
 	data, _ := os.ReadFile("./input.txt")
 	inputRaw := string(data)
@@ -107,20 +109,35 @@ func part3(input string) int {
 func part4(input string) int {
 	result := 0
 	rawRows := strings.Split(input, "\n")
+	numRows := len(rawRows)
+	ch := make(chan int, numRows)
 
 	for _, row := range rawRows {
-		fmt.Println(row)
+		// fmt.Println(row)
 		fields := strings.Fields(row)
 		patternString := fields[0]
 		toMatch := convertStringToIntSlice(fields[1])
-		
-		result += getNumPossibilities(patternString, toMatch, 0)
+
+		patternString = multiplyString(patternString, multiplier)
+		toMatch = multiplyInts(toMatch, multiplier)
+
+		for i:=0; i<numRows; i++ {
+			go getPatternResultChan(patternString, toMatch, ch)
+		}
+	}
+
+	for i:=0; i<numRows; i++ {
+		result += <- ch
 	}
 
 	return result
 }
 
-func getNumPossibilities(pattern string, remainingCombis []int, currCounter int) int {
+func getPatternResultChan(pattern string, ints []int, ch chan int) {
+	ch <- getNumPossibilities(pattern, ints, 0, 0)
+}
+
+func getNumPossibilities(pattern string, remainingCombis []int, currCounter, result int) int {
 
 	currChar := pattern[0:1]
 
@@ -130,53 +147,66 @@ func getNumPossibilities(pattern string, remainingCombis []int, currCounter int)
 		case "#":
 			currCounter += 1
 			if len(remainingCombis) == 1 && remainingCombis[0] == currCounter {
-				return 1
+				return result + 1
 			}
+			return result
 		case ".":
 			if len(remainingCombis) == 1 && remainingCombis[0] == currCounter {
-				return 1
+				return result + 1
 			}
+			return result
 		case "?":
 			if len(remainingCombis) == 0 {
-				return 1
+				return result + 1
 			}
 			if len(remainingCombis) == 1 {
 				tomatch := remainingCombis[0]
 				if abs(tomatch-currCounter) <= 1 {
-					return 1
+					return result + 1
 				}
 			}
-			return 1
-			// return getNumPossibilities("#", remainingCombis, currCounter, totalPossibilities) + getNumPossibilities(".", remainingCombis, currCounter, totalPossibilities)
+			return result
 		}
 	}
 
 	switch currChar {
 	case "#":
-		
-	}
-	if currChar == "#" || currChar == "?" {
+		if len(remainingCombis) < 1 {
+			return result
+		}
 		currCounter += 1
-		if len(remainingCombis) > 0 && currCounter <= remainingCombis[0] {
-			totalPossibilities += getNumPossibilities(pattern[1:], remainingCombis, currCounter, totalPossibilities)
+		if currCounter > remainingCombis[0] {
+			return result
 		}
-	}
-	if currChar == "." || currChar == "?" {
-		if currCounter > 0 {
-			if len(remainingCombis) > 0 && currCounter == remainingCombis[0] {
-				// good, still match
-				remainingPattern := pattern[]
+		return getNumPossibilities(pattern[1:], remainingCombis, currCounter, result)
+	case ".":
+		if currCounter > 0 { // previous char was #
+			if len(remainingCombis) < 1 {
+				return result
 			}
-
+			if currCounter != remainingCombis[0] { // current pattern don't match
+				return result
+			}
+			// now we know is match, decide if need to carry on with the rest of the pattern
+			// if no more combi, return +1 if no more #
+			if len(remainingCombis[1:]) < 1 && !strings.Contains(pattern[1:], "#") {
+				return result + 1
+			}
+			// if still have combi but is all '.', return result
+			if len(remainingCombis[1:]) >= 1 && !strings.Contains(pattern[1:], "#") && !strings.Contains(pattern[1:], "?") {
+				return result
+			}
+			// recurse
 			currCounter = 0
-		} else {
-
+			return getNumPossibilities(pattern[1:], remainingCombis[1:], currCounter, result)
 		}
-
-		
+		return getNumPossibilities(pattern[1:], remainingCombis, currCounter, result)
+	case "?":
+		result = getNumPossibilities("#"+pattern[1:], remainingCombis, currCounter, result)
+		result = getNumPossibilities("."+pattern[1:], remainingCombis, currCounter, result)
+		return result
 	}
-
-	return totalPossibilities
+	return 0 //should not be used
 }
 
 func convertStringToIntSlice(pattern string) []int {
@@ -280,4 +310,20 @@ func abs(x int) int {
 		return x
 	}
 	return x*-1
+}
+
+func multiplyString(pattern string, times int) string {
+	temp := []string{}
+	for i:=0; i<times; i++ {
+		temp = append(temp, pattern)
+	}
+	return strings.Join(temp, "?")
+}
+
+func multiplyInts(ints []int, times int) []int {
+	result := []int{}
+	for i:=0; i<times; i++ {
+		result = append(result, ints...)
+	}
+	return result
 }
