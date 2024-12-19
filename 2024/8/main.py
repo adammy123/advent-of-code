@@ -61,7 +61,7 @@ def findAntiNodes(coords: list[list[int]], mapHeight: int, mapLength: int) -> se
 
 def main():
     print('Starting main')
-    inputFile = open("/Users/adam/Code/advent-of-code/2024/8/input.txt", "r")
+    inputFile = open("input.txt", "r")
     inputRaw = inputFile.read()
     
     # key: letter/digit
